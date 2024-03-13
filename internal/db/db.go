@@ -1,19 +1,18 @@
-// internal/db/db.go
-
 package db
 
 import (
-	"github.com/adilimudassir/echo-blog/internal/models"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
+    "gorm.io/driver/sqlite"
+    "gorm.io/gorm"
+
+    "github.com/adilimudassir/echo-blog/internal/models"
 )
 
-// DB represents the interface for interacting with the database
-type DB interface {
-    PostRepository() PostRepository
+var registeredModels = []interface{}{
+    &models.Post{},
+    &models.Comment{},
 }
 
-// NewDB initializes and returns a new DB object
+// NewDB initializes and returns a new DB object with auto migration for all registered models
 func NewDB() (*gorm.DB, error) {
     // Open a new SQLite database connection
     // Replace "test.db" with the path to your SQLite database file
@@ -22,8 +21,8 @@ func NewDB() (*gorm.DB, error) {
         return nil, err
     }
 
-    // AutoMigrate the model schemas
-    if err := db.AutoMigrate(&models.Post{}); err != nil {
+    // AutoMigrate the registered model schemas
+    if err := db.AutoMigrate(registeredModels...); err != nil {
         return nil, err
     }
 

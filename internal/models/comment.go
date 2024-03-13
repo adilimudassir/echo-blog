@@ -9,7 +9,6 @@ type Comment struct {
     Author    string    `json:"author" validate:"required"`
     Content   string    `json:"content" validate:"required"`
 	
- 	PostID    uint   	`gorm:"index" json:"post_id" validate:"required"`
+ 	PostID    uint
     Post      Post      `gorm:"foreignKey:PostID"`
-
 }
