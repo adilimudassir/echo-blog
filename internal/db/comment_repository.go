@@ -49,3 +49,8 @@ func (cr *CommentRepository) UpdateComment(comment *models.Comment) error {
 func (cr *CommentRepository) DeleteComment(id uint) error {
     return cr.db.Delete(&models.Comment{}, id).Error
 }
+
+// PreloadPost preloads the related Post for a given comment
+func (cr *CommentRepository) PreloadPost(comment *models.Comment) error {
+    return cr.db.Preload("Post").Find(comment).Error
+}

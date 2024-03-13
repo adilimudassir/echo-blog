@@ -29,38 +29,38 @@ func NewCommentController(repo *db.CommentRepository, postRepo *db.PostRepositor
 
 // CreateComment creates a new comment
 func (cc *CommentController) CreateComment(c echo.Context) error {
-	// Retrieve post ID from route parameters
-	postID, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		return err
-	}
+    // Retrieve post ID from route parameters
+    postID, err := strconv.Atoi(c.Param("id"))
+    if err != nil {
+        return err
+    }
 
-	// Find the corresponding post
-	post, err := cc.postRepo.GetPostByID(uint(postID))
-	if err != nil {
-		return err
-	}
+    // Find the corresponding post
+    post, err := cc.postRepo.GetPostByID(uint(postID))
+    if err != nil {
+        return err
+    }
 
-	// Bind the comment from the request body
-	comment := new(models.Comment)
-	if err := c.Bind(comment); err != nil {
-		return err
-	}
+    // Bind the comment from the request body
+    comment := new(models.Comment)
+    if err := c.Bind(comment); err != nil {
+        return err
+    }
 
-	// Validate the comment
-	if err := cc.validate.Struct(comment); err != nil {
-		return c.JSON(http.StatusBadRequest, helpers.FormatValidationErrors(err))
-	}
+    // Validate the comment
+    if err := cc.validate.Struct(comment); err != nil {
+        return c.JSON(http.StatusBadRequest, helpers.FormatValidationErrors(err))
+    }
 
-	// Associate the comment with the post
-	comment.PostID = post.ID
+    // Associate the comment with the post
+    comment.PostID = post.ID
 
-	// Create the comment
-	if err := cc.repo.CreateComment(comment); err != nil {
-		return err
-	}
+    // Create the comment
+    if err := cc.repo.CreateComment(comment); err != nil {
+        return err
+    }
 
-	return c.JSON(http.StatusCreated, comment)
+    return c.JSON(http.StatusCreated, comment)
 }
 
 // GetCommentByID retrieves a comment by its ID
@@ -73,12 +73,18 @@ func (cc *CommentController) GetCommentByID(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+
+	// Preload the related Post
+    if err := cc.repo.PreloadPost(comment); err != nil {
+        return err
+    }
+
 	return c.JSON(http.StatusOK, comment)
 }
 
 // GetAllCommentsByPostID retrieves all comments for a given post ID
 func (cc *CommentController) GetAllCommentsByPostID(c echo.Context) error {
-	postID, err := strconv.Atoi(c.Param("post_id"))
+	postID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return err
 	}
@@ -86,6 +92,14 @@ func (cc *CommentController) GetAllCommentsByPostID(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+
+	// Preload the related Post for each comment
+    for _, comment := range comments {
+        if err := cc.repo.PreloadPost(&comment); err != nil {
+            return err
+        }
+    }
+	
 	return c.JSON(http.StatusOK, comments)
 }
 

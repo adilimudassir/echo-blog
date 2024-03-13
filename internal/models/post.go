@@ -7,5 +7,5 @@ type Post struct {
     gorm.Model
     Title   string   `json:"title" validate:"required"`
     Content string   `json:"content" validate:"required"`
-    Comments []Comment `gorm:"foreignKey:PostID"`
+    Comments []Comment `json:"comments" gorm:"foreignKey:PostID"`
 }
